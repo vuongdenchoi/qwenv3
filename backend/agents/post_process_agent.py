@@ -11,7 +11,9 @@ import io
 VALID_SEVERITIES = {"minor", "major", "critical"}
 VALID_CATEGORIES = {
     "color_theory", "typography", "layout_rules",
-    "logo_design", "poster_design", "general",
+    "logo_design", "poster_design",
+    "icon_design", "pattern_design",
+    "general",
 }
 
 

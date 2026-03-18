@@ -4,6 +4,8 @@ Improvements:
   - default top_k=10 (from 5)
   - category boost (×1.3) when query keywords match a design domain
   - returns enriched metadata: rule_number, section, category
+  - supports 7 categories: color_theory, typography, layout_rules,
+    logo_design, poster_design, icon_design, pattern_design
 """
 import pickle
 import json
@@ -27,9 +29,18 @@ CATEGORY_KEYWORDS: Dict[str, List[str]] = {
                         "column", "proximity", "whitespace", "white space", "hierarchy",
                         "balance", "symmetry", "asymmetry", "direction", "wayfinding"],
     "logo_design"   : ["logo", "logotype", "brand", "identity", "mark", "monogram",
-                        "icon", "symbol", "branding", "graphic identity", "wordmark"],
+                        "wordmark", "branding", "graphic identity", "exclusion zone"],
     "poster_design" : ["poster", "advertisement", "billboard", "campaign", "print",
-                        "focal", "visual noise", "signage", "outdoor", "format"],
+                        "focal", "visual noise", "outdoor", "format", "signage"],
+    "icon_design"   : ["icon", "pictogram", "symbol", "wayfinding", "glyph",
+                        "ui icon", "sign", "pictograph", "stroke weight", "icon set",
+                        "icon system", "monochrome icon", "icon grid", "legibility",
+                        "icon style", "navigation icon", "app icon", "ui symbol"],
+    "pattern_design": ["pattern", "motif", "repeat", "tile", "tiling", "textile",
+                        "half-drop", "brick repeat", "mirrored repeat", "tossed",
+                        "surface design", "print design", "seamless", "density",
+                        "ditsy", "floral pattern", "geometric pattern", "folk pattern",
+                        "ethnic pattern", "conversational print", "allover print"],
 }
 
 CATEGORY_BOOST = 1.3  # score multiplier when query matches a category
