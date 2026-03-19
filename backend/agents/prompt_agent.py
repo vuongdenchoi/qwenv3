@@ -36,7 +36,7 @@ Instructions:
 2. For every violation you detect:
    a. Identify the exact problematic region.
    b. Place a bounding box around it.
-   c. Explain the violation referencing the specific rule name.
+   c. Explain the violation referencing the specific rule name (no word/character limit).
    d. Assign a severity level: "minor" | "major" | "critical"
    e. Specify the design category: one of "color_theory" | "typography" | \
 "layout_rules" | "logo_design" | "poster_design" | "icon_design" | \
@@ -46,19 +46,19 @@ Instructions:
 
 Return ONLY valid JSON — no markdown, no extra text:
 {{
-  "errors": [
+  "e": [
     {{
-      "box_2d"  : [x1, y1, x2, y2],
-      "reason"  : "Specific explanation referencing the rule",
-      "severity": "minor|major|critical",
-      "category": "color_theory|typography|layout_rules|logo_design|poster_design|icon_design|pattern_design|general"
+      "c": [x1, y1, x2, y2],                // box_2d
+      "r": "Specific explanation referencing the rule",     // reason
+      "s": "minor|major|critical",          // severity
+      "g": "color_theory|typography|layout_rules|logo_design|poster_design|icon_design|pattern_design|general" // category
     }}
   ]
 }}
 
 If the design has NO violations, return:
 {{
-  "errors": []
+  "e": []
 }}
 """
 

@@ -116,10 +116,10 @@ POST /analyze
     │       │               - (history text-only của session, nếu có)
     │       │               - user: (image + instruction)
     │       │           • Parse JSON từ text response (strip markdown fences)
-    │       │           • Trả dict {"errors": [...]}
+    │       │           • Trả dict với keys rút gọn, ví dụ {"e": [...]}
     │       │
     │       └─[4]─► PostProcessAgent.process(raw_result, image_bytes)
-    │                   • Validate cấu trúc JSON (bắt buộc có "errors" list)
+    │                   • Validate cấu trúc JSON (bắt buộc có "e" (errors) là list)
     │                   • Clamp bounding boxes trong giới hạn ảnh
     │                   • Loại bỏ boxes trùng lặp (overlap >80%)
     │                   • Lọc boxes quá nhỏ (<5×5 px)
@@ -127,7 +127,11 @@ POST /analyze
     │                   • Validate category (color_theory/typography/layout_rules/
     │                     logo_design/poster_design/icon_design/pattern_design/general)
     │                   • Build severity_summary
-    │                   • Trả dict hoàn chỉnh
+    │                   • Trả dict hoàn chỉnh với keys viết tắt:
+    │                       - "e"   : list lỗi đã clean
+    │                       - "isz" : kích thước ảnh {"w","h"}
+    │                       - "te"  : tổng số lỗi
+    │                       - "ss"  : severity_summary
     │
     ├─► (5) Update session memory (backend/main.py)
     │       • add_query(key, used_query)
@@ -140,7 +144,43 @@ POST /analyze
 ### Bước 4 — Hiển thị kết quả
 
 Frontend (`index.html`) nhận JSON, vẽ bounding boxes lên ảnh canvas và hiển thị
-danh sách lỗi kèm severity, category, và mô tả vi phạm.
+danh sách lỗi kèm severity, category, và mô tả vi phạm (dùng schema rút gọn).
+
+---
+
+## Chú thích schema JSON rút gọn
+
+### Output chính của `/analyze`
+
+Backend trả về dạng:
+
+```json
+{
+  "e": [
+    {
+      "c": [x1, y1, x2, y2],
+      "r": "Specific explanation referencing the rule",
+      "s": "minor|major|critical",
+      "g": "color_theory|typography|layout_rules|logo_design|poster_design|icon_design|pattern_design|general"
+    }
+  ],
+  "isz": { "w": W, "h": H },
+  "te": N,
+  "ss": { "minor": n1, "major": n2, "critical": n3 }
+}
+```
+
+Trong đó:
+- **`e`**: errors (danh sách lỗi)
+- **`c`**: coordinates (box_2d) = `[x1, y1, x2, y2]`
+- **`r`**: reason (mô tả lỗi, không giới hạn độ dài)
+- **`s`**: severity
+- **`g`**: category (design domain)
+- **`isz`**: image size
+  - `w`: width
+  - `h`: height
+- **`te`**: total errors
+- **`ss`**: severity summary (key vẫn là `minor|major|critical`)
 
 ---
 

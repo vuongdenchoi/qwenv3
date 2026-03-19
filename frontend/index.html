@@ -514,9 +514,9 @@ async function startAnalysis() {
 // Render results
 // -----------------------------------------------------------------------
 function renderResults(data) {
-  currentErrors = data.errors || [];
-  const imgW = data.image_size?.width  || 1;
-  const imgH = data.image_size?.height || 1;
+  currentErrors = data.e || [];
+  const imgW = data.isz?.w  || 1;
+  const imgH = data.isz?.h || 1;
 
   // Show image card
   document.getElementById('image-card').style.display = 'block';
@@ -535,7 +535,7 @@ function renderResults(data) {
 
     // Draw bounding boxes
     currentErrors.forEach((err, i) => {
-      const [x1, y1, x2, y2] = err.box_2d;
+      const [x1, y1, x2, y2] = err.c;
       const colors = ['#ff4d6d', '#6c63ff', '#00d2ff', '#ffd166', '#06d6a0'];
       const color  = colors[i % colors.length];
 
@@ -578,12 +578,12 @@ function renderResults(data) {
   }
 
   list.innerHTML = currentErrors.map((err, i) => {
-    const [x1, y1, x2, y2] = err.box_2d;
+    const [x1, y1, x2, y2] = err.c;
     return `
     <div class="error-item" id="err-${i}" onclick="highlightError(${i})">
       <div class="error-num">${i + 1}</div>
       <div>
-        <div class="error-text">${escapeHtml(err.reason)}</div>
+        <div class="error-text">${escapeHtml(err.r)}</div>
         <div class="error-coords">box [${x1}, ${y1}, ${x2}, ${y2}]</div>
       </div>
     </div>`;

@@ -143,12 +143,12 @@ async def chat(req: ChatRequest):
             if last:
                 image_bytes, last_result = last
                 # Provide brief context of errors to help localization.
-                errors = (last_result or {}).get("errors", [])
+                errors = (last_result or {}).get("e", [])
                 ctx = ""
                 if isinstance(errors, list) and errors:
                     top = errors[:5]
                     ctx = json.dumps(
-                        [{"i": i, "box_2d": e.get("box_2d"), "reason": e.get("reason")} for i, e in enumerate(top)],
+                        [{"i": i, "c": e.get("c"), "r": e.get("r")} for i, e in enumerate(top)],
                         ensure_ascii=False,
                     )
 
@@ -198,7 +198,7 @@ async def zoom(req: ZoomRequest):
         raise HTTPException(status_code=404, detail="Chua co ket qua analyze cho session nay.")
     image_bytes, result = last
 
-    errors = result.get("errors", []) if isinstance(result, dict) else []
+    errors = result.get("e", []) if isinstance(result, dict) else []
     box = None
     if req.error_index is not None:
         idx = int(req.error_index)
@@ -315,10 +315,10 @@ async def analyze_design(
         # Store a compact assistant summary (useful for consistency).
         assistant_text = json.dumps(
             {
-                "effective_query": effective_query,
-                "total_errors": result.get("total_errors"),
-                "severity_summary": result.get("severity_summary"),
-                "errors": result.get("errors", []),
+                "q": effective_query,
+                "te": result.get("te"),
+                "ss": result.get("ss"),
+                "e": result.get("e", []),
             },
             ensure_ascii=False,
         )

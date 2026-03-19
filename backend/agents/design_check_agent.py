@@ -65,9 +65,9 @@ class DesignCheckAgent:
         # Step 4: Post-process
         result = self.post_proc.process(raw_result, image_bytes)
         print(
-            f"[DesignCheckAgent] Final errors: {result['total_errors']} "
-            f"(minor={result['severity_summary']['minor']}, "
-            f"major={result['severity_summary']['major']}, "
-            f"critical={result['severity_summary']['critical']})"
+            f"[DesignCheckAgent] Final errors: {result['te']} "
+            f"(minor={result['ss']['minor']}, "
+            f"major={result['ss']['major']}, "
+            f"critical={result['ss']['critical']})"
         )
         return result

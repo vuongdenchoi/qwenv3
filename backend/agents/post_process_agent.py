@@ -32,13 +32,10 @@ class PostProcessAgent:
         5. Validate severity + category fields (new)
         6. Build severity_summary (new)
         """
-        # --- 1. Validate structure ---
-        if "errors" not in raw_result:
-            raise ValueError("Response JSON thiếu trường 'errors'")
-
-        errors = raw_result["errors"]
-        if not isinstance(errors, list):
-            raise ValueError("'errors' phải là một list")
+        # --- 1. Validate structure (hỗ trợ cả schema cũ và mới) ---
+        errors = raw_result.get("e") or raw_result.get("errors")
+        if errors is None or not isinstance(errors, list):
+            raise ValueError("Response JSON thiếu trường 'e' hoặc 'errors'")
 
         # --- 2. Lấy kích thước ảnh ---
         img = Image.open(io.BytesIO(image_bytes))
@@ -51,10 +48,10 @@ class PostProcessAgent:
         for err in errors:
             if not isinstance(err, dict):
                 continue
-            if "box_2d" not in err or "reason" not in err:
+            box = err.get("c") or err.get("box_2d")
+            reason = err.get("r") or err.get("reason")
+            if box is None or reason is None:
                 continue
-
-            box = err["box_2d"]
             if not (isinstance(box, list) and len(box) == 4):
                 continue
 
@@ -84,31 +81,31 @@ class PostProcessAgent:
                 continue
             seen_boxes.add(box_key)
 
-            # --- Validate severity (new) ---
-            severity = str(err.get("severity", "minor")).lower().strip()
+            # --- Validate severity (hỗ trợ s/severity) ---
+            severity = str(err.get("s") or err.get("severity") or "minor").lower().strip()
             if severity not in VALID_SEVERITIES:
                 severity = "minor"
 
-            # --- Validate category (new) ---
-            category = str(err.get("category", "general")).lower().strip()
+            # --- Validate category (hỗ trợ g/category) ---
+            category = str(err.get("g") or err.get("category") or "general").lower().strip()
             if category not in VALID_CATEGORIES:
                 category = "general"
 
             cleaned.append({
-                "box_2d"  : [x1, y1, x2, y2],
-                "reason"  : str(err["reason"]).strip(),
-                "severity": severity,
-                "category": category,
+                "c"  : [x1, y1, x2, y2],
+                "r"  : str(reason).strip(),
+                "s": severity,
+                "g": category,
             })
 
         # --- 4. Build severity summary (new) ---
         severity_summary = {"minor": 0, "major": 0, "critical": 0}
         for item in cleaned:
-            severity_summary[item["severity"]] += 1
+            severity_summary[item["s"]] += 1
 
         return {
-            "errors"          : cleaned,
-            "image_size"      : {"width": img_w, "height": img_h},
-            "total_errors"    : len(cleaned),
-            "severity_summary": severity_summary,
+            "e"  : cleaned,
+            "isz": {"w": img_w, "h": img_h},
+            "te" : len(cleaned),
+            "ss" : severity_summary,
         }
