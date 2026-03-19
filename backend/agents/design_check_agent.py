@@ -30,6 +30,7 @@ class DesignCheckAgent:
         image_bytes,
         filename="image.jpg",
         query="graphic design poster advertisement",
+        history_messages=None,
     ):
         """Main entry point. Returns validated result dict."""
         # Step 1: Retrieval (with category boost)
@@ -57,6 +58,7 @@ class DesignCheckAgent:
             system_prompt=system_prompt,
             instruction=instruction,
             mime_type=mime_type,
+            history_messages=history_messages,
         )
         print(f"[DesignCheckAgent] Raw result: {raw_result}")
 

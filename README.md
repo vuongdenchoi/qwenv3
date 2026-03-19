@@ -95,7 +95,13 @@ POST /analyze
 Content-Type: multipart/form-data
 
 file  : <image file>  (JPEG/PNG/WEBP, max 10MB)
-query : <string>      (optional, default: "graphic design poster advertisement")
+query : <string>      (optional; nếu để trống, backend sẽ lấy query gần nhất của phiên)
+session_id : <string> (optional; dùng để backend nhớ câu hỏi theo phiên)
+user_id : <string>    (optional; thay thế cho session_id nếu bạn không có session)
+
+Ghi nhớ hội thoại:
+- Backend sẽ lưu thêm "turns" (user query + assistant JSON tóm tắt) theo `session_id/user_id`
+- Các turns gần nhất sẽ được gửi kèm vào `messages` khi gọi Qwen, giúp LLM trả lời nhất quán khi người dùng hỏi lại
 
 Response:
 {
