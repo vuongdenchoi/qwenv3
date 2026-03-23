@@ -128,9 +128,64 @@
     }
 
     /* ============================
+       Design Type Selector
+    ============================ */
+    .type-selector {
+      margin-top: 18px;
+    }
+    .type-selector .label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      font-weight: 500;
+    }
+    .type-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .type-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      transition: border-color .2s, background .2s, color .2s;
+      user-select: none;
+    }
+    .type-chip:hover {
+      border-color: var(--accent);
+      color: var(--text-main);
+    }
+    .type-chip input[type="checkbox"] {
+      display: none;
+    }
+    .type-chip.active {
+      border-color: var(--accent);
+      background: rgba(108,99,255,.15);
+      color: var(--text-main);
+    }
+    .type-chip .chip-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background .2s;
+      flex-shrink: 0;
+    }
+    .type-chip.active .chip-dot {
+      background: var(--accent);
+    }
+
+    /* ============================
        Query input
     ============================ */
-    .form-group { margin-top: 18px; }
+    .form-group { margin-top: 14px; }
     .form-group label {
       display: block;
       font-size: 0.8rem;
@@ -151,6 +206,11 @@
       transition: border-color .2s;
     }
     .form-group input:focus { border-color: var(--accent); }
+    .query-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 5px;
+    }
 
     /* ============================
        Analyze Button
@@ -342,12 +402,44 @@
       <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp" />
       <img id="thumb-preview" alt="Preview" />
 
-      <!-- Query -->
+      <!-- Design Type Selector (Hướng 3) -->
+      <div class="type-selector">
+        <span class="label">🎯 Loại thiết kế <span style="font-weight:400">(chọn nhiều)</span></span>
+        <div class="type-chips" id="type-chips">
+          <label class="type-chip" id="chip-poster">
+            <input type="checkbox" value="poster" />
+            <span class="chip-dot"></span> 🪧 Poster
+          </label>
+          <label class="type-chip" id="chip-logo">
+            <input type="checkbox" value="logo" />
+            <span class="chip-dot"></span> 🏷️ Logo
+          </label>
+          <label class="type-chip" id="chip-icon">
+            <input type="checkbox" value="icon" />
+            <span class="chip-dot"></span> 🔲 Icon
+          </label>
+          <label class="type-chip" id="chip-pattern">
+            <input type="checkbox" value="pattern" />
+            <span class="chip-dot"></span> 🔁 Pattern
+          </label>
+          <label class="type-chip" id="chip-typography">
+            <input type="checkbox" value="typography" />
+            <span class="chip-dot"></span> 🔤 Typography
+          </label>
+          <label class="type-chip" id="chip-layout">
+            <input type="checkbox" value="layout" />
+            <span class="chip-dot"></span> 📐 Layout
+          </label>
+        </div>
+      </div>
+
+      <!-- Query (advanced / fallback) -->
       <div class="form-group">
-        <label for="query-input">🔎 Context query (tuỳ chỉnh retrieval)</label>
+        <label for="query-input">🔎 Query nâng cao <span style="font-weight:400;color:var(--text-muted)">(tự điền hoặc để trống)</span></label>
         <input type="text" id="query-input"
-               value="graphic design poster advertisement"
-               placeholder="e.g. logo design branding" />
+               value=""
+               placeholder="Tự động từ loại đã chọn, hoặc nhập tay..." />
+        <div class="query-hint" id="query-hint">Chưa chọn loại → dùng query mặc định</div>
       </div>
 
       <!-- API Key -->
@@ -473,7 +565,8 @@ async function startAnalysis() {
   }
 
   const apiKey = document.getElementById('apikey-input').value.trim();
-  const query  = document.getElementById('query-input').value.trim();
+  // Hướng 3: build query từ checkboxes đã chọn
+  const query  = buildQueryFromChips();
 
   setLoading(true);
 
@@ -633,6 +726,55 @@ document.getElementById('analyze-btn').addEventListener('focus', () => {
   const warn = document.getElementById('api-warning');
   warn.style.display = key ? 'none' : 'block';
 });
+
+// -----------------------------------------------------------------------
+// Hướng 3: Design Type Chips logic
+// -----------------------------------------------------------------------
+const TYPE_QUERIES = {
+  poster:     'poster advertisement campaign billboard print',
+  logo:       'logo brand identity mark wordmark logotype',
+  icon:       'icon pictogram symbol glyph ui icon',
+  pattern:    'pattern repeat motif tile seamless textile',
+  typography: 'typography font typeface legibility leading tracking',
+  layout:     'layout grid composition whitespace alignment hierarchy',
+};
+
+// Toggle chip active state — dùng change trên checkbox để tránh double-fire
+document.querySelectorAll('.type-chip input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('.type-chip').classList.toggle('active', cb.checked);
+    updateQueryHint();
+  });
+});
+
+function buildQueryFromChips() {
+  // Ưu tiên: chips đã chọn → merge query
+  const checkedChips = [...document.querySelectorAll('.type-chip.active')];
+  const manualQuery  = document.getElementById('query-input').value.trim();
+
+  if (checkedChips.length > 0) {
+    const chipQuery = checkedChips
+      .map(chip => TYPE_QUERIES[chip.querySelector('input').value] || '')
+      .join(' ');
+    // Merge chip query + manual query (nếu có)
+    return manualQuery ? `${chipQuery} ${manualQuery}` : chipQuery;
+  }
+  // Fallback: manual query hoặc chuỗi trống (backend dùng default)
+  return manualQuery;
+}
+
+function updateQueryHint() {
+  const checkedChips = [...document.querySelectorAll('.type-chip.active')];
+  const hint = document.getElementById('query-hint');
+  if (checkedChips.length === 0) {
+    hint.textContent = 'Chưa chọn loại → dùng query mặc định';
+    hint.style.color = 'var(--text-muted)';
+  } else {
+    const names = checkedChips.map(c => c.innerText.trim()).join(', ');
+    hint.textContent = `✅ Đã chọn: ${names}`;
+    hint.style.color = 'var(--accent)';
+  }
+}
 
 // -----------------------------------------------------------------------
 // Chat

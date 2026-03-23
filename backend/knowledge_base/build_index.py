@@ -1,15 +1,16 @@
 """
-Build TF-IDF index từ design rules knowledge base.
-Chunking strategy: split per individual Rule block instead of fixed-char windows,
-so each chunk corresponds to exactly one design rule.
+Build Embedding index từ design rules knowledge base.
+Dùng multilingual sentence-transformers để hỗ trợ cả tiếng Việt + tiếng Anh.
+Chunking strategy: split per individual Rule block (one chunk = one rule).
 """
 import sys
 import re
 import json
-import pickle
 import numpy as np
 from typing import List, Dict, Tuple
 from pathlib import Path
+
+MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
 
 # ---------------------------------------------------------------------------
 # Paths
@@ -122,28 +123,30 @@ def chunk_docs(docs: List[dict]) -> List[dict]:
     return chunks
 
 # ---------------------------------------------------------------------------
-# 3. Build TF-IDF vectorizer
+# 3. Build Embedding vectors
 # ---------------------------------------------------------------------------
-def build_tfidf(chunks: List[dict]):
-    from sklearn.feature_extraction.text import TfidfVectorizer
+def build_embeddings(chunks: List[dict]):
+    from sentence_transformers import SentenceTransformer
     texts = [c["text"] for c in chunks]
-    vectorizer = TfidfVectorizer(
-        ngram_range=(1, 2),
-        max_features=10000,   # increased from 5000
-        sublinear_tf=True,
-    )
-    matrix = vectorizer.fit_transform(texts)
-    print(f"  TF-IDF matrix: {matrix.shape}")
-    return vectorizer, matrix
+    print(f"  Loading model: {MODEL_NAME}")
+    model = SentenceTransformer(MODEL_NAME)
+    print(f"  Encoding {len(texts)} chunks...")
+    embeddings = model.encode(
+        texts,
+        show_progress_bar=True,
+        batch_size=32,
+        convert_to_numpy=True,
+    )  # shape: (N, 384)
+    print(f"  Embeddings shape: {embeddings.shape}")
+    return embeddings
 
 # ---------------------------------------------------------------------------
 # 4. Save index
 # ---------------------------------------------------------------------------
-def save_index(vectorizer, matrix, chunks: List[dict]):
-    from scipy import sparse
-    with open(INDEX_DIR / "tfidf_vectorizer.pkl", "wb") as f:
-        pickle.dump(vectorizer, f)
-    sparse.save_npz(str(INDEX_DIR / "tfidf_matrix.npz"), matrix)
+def save_index(embeddings: np.ndarray, chunks: List[dict]):
+    # Lưu embedding vectors
+    np.save(str(INDEX_DIR / "embeddings.npy"), embeddings)
+    # Lưu metadata (giữ nguyên format)
     metadata = [
         {
             "id"         : i,
@@ -158,12 +161,14 @@ def save_index(vectorizer, matrix, chunks: List[dict]):
     with open(INDEX_DIR / "metadata.json", "w", encoding="utf-8") as f:
         json.dump(metadata, f, ensure_ascii=False, indent=2)
     print(f"  Index saved to: {INDEX_DIR}")
+    print(f"  Files: embeddings.npy ({embeddings.nbytes // 1024}KB), metadata.json")
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    print("=== Building Knowledge Base Index (TF-IDF, rule-level chunking) ===")
+    print("=== Building Knowledge Base Index (Embedding, rule-level chunking) ===")
+    print(f"  Model     : {MODEL_NAME}")
     print(f"  Rules dir : {RULES_DIR}")
     print(f"  Index dir : {INDEX_DIR}")
 
@@ -176,11 +181,11 @@ if __name__ == "__main__":
     print("\n[Step 2] Chunking documents (per-rule)...")
     chunks = chunk_docs(docs)
 
-    print("\n[Step 3] Building TF-IDF index...")
-    vectorizer, matrix = build_tfidf(chunks)
+    print("\n[Step 3] Building embedding vectors...")
+    embeddings = build_embeddings(chunks)
 
     print("\n[Step 4] Saving index...")
-    save_index(vectorizer, matrix, chunks)
+    save_index(embeddings, chunks)
 
     print("\n[DONE] Index ready at:", INDEX_DIR)
     # Print breakdown by category

@@ -8,3 +8,4 @@ faiss-cpu
 langchain
 langchain-community
 numpy
+scikit-learn

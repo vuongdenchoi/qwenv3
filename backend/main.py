@@ -2,6 +2,9 @@
 FastAPI backend server cho Design Check AI System.
 """
 import os
+os.environ["USE_TF"] = "0"
+os.environ["USE_TORCH"] = "1"
+
 import io
 import sys
 from typing import Optional

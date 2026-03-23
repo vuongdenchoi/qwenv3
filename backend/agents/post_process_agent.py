@@ -7,6 +7,7 @@ Improvements:
 """
 from PIL import Image
 import io
+from .color_analyzer import analyze_box_contrast
 
 VALID_SEVERITIES = {"minor", "major", "critical"}
 VALID_CATEGORIES = {
@@ -33,7 +34,9 @@ class PostProcessAgent:
         6. Build severity_summary (new)
         """
         # --- 1. Validate structure (hỗ trợ cả schema cũ và mới) ---
-        errors = raw_result.get("e") or raw_result.get("errors")
+        errors = raw_result.get("e")
+        if errors is None:
+            errors = raw_result.get("errors")
         if errors is None or not isinstance(errors, list):
             raise ValueError("Response JSON thiếu trường 'e' hoặc 'errors'")
 
@@ -90,11 +93,22 @@ class PostProcessAgent:
             category = str(err.get("g") or err.get("category") or "general").lower().strip()
             if category not in VALID_CATEGORIES:
                 category = "general"
+                
+            # --- Vision-based Color Analysis (WCAG) ---
+            new_reason = str(reason).strip()
+            new_severity = severity
+            if category in ["typography", "color_theory"]:
+                wcag_result = analyze_box_contrast(image_bytes, [x1, y1, x2, y2])
+                ratio = wcag_result.get("ratio")
+                if ratio is not None and not wcag_result.get("pass"):
+                    # Override reason and severity based on hard math
+                    new_reason = f"{new_reason} [LỖI WCAG: Tỷ lệ tương phản chỉ đạt {ratio}:1, dưới mức chuẩn 4.5:1. Bạn cần tăng độ tương phản sáng tối giữa chữ và nền.]"
+                    new_severity = "critical" if ratio < 3.0 else "major"
 
             cleaned.append({
                 "c"  : [x1, y1, x2, y2],
-                "r"  : str(reason).strip(),
-                "s": severity,
+                "r"  : new_reason,
+                "s": new_severity,
                 "g": category,
             })
 
