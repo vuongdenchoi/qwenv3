@@ -25,7 +25,8 @@ d:\qwen3v\
 │   │   ├── retrieval_agent.py       ← Step 2: Tìm Rules với TF-IDF + Boosting
 │   │   ├── prompt_agent.py          ← Step 3: Ghép prompt với context & schema
 │   │   ├── qwen_agent.py            ← Step 4: Kết nối DashScope API (qwen3-vl)
-│   │   └── post_process_agent.py    ← Step 6: Validate, format Box, lọc độ ưu tiên (Severity)
+│   │   ├── color_analyzer.py        ← Step 5: Tính toán WCAG Contrast bằng K-Means (Scikit-learn)
+│   │   └── post_process_agent.py    ← Step 6: Validate, format Box, chèn lỗi WCAG, lọc độ ưu tiên
 │   └── knowledge_base/
 │       ├── build_index.py           ← Step 1: Phân mảnh rules và tạo Matrix Vector (TF-IDF)
 │       └── faiss_index/             ← Thư mục chứa Vector Files (.pkl, .npz, metadata)
@@ -43,6 +44,7 @@ d:\qwen3v\
 | Chế độ Sinh Index (TF-IDF) | ✅ Chạy gọn nhẹ, chunking thông minh theo từng Rule |
 | RetrievalAgent | ✅ Rule trả về chính xác cho prompt text |
 | Qwen Agent & Validation | ✅ JSON output tuân thủ format (box, error severity) |
+| Color Analyzer (WCAG) | ✅ Tính cực chuẩn tỷ lệ tương phản chữ/nền bằng K-Means |
 | Server Backend | ✅ Load tốt, quản lý Exception/Error code rõ ràng |
 | Giao Diện Frontend | ✅ Rendering Canvas mượt mà, phân loại màu theo Severity |
 
@@ -89,7 +91,7 @@ Dự án đã có base vững chắc. Để đóng gói thành sản phẩm thư
 ### 3. Nâng cấp Engine AI & Luồng Pipeline
 - **Multiple Model Fallback**: Mở rộng `qwen_agent.py` thành mô hình Factory pattern, cho phép tích hợp linh động nhiều API khác ngoài DashScope qua LangChain, chẳng hạn gửi request backup đến **GPT-4o** hay **Claude 3.5 Sonnet** nếu mô hình của Qwen bị timeout, giới hạn rate limit.
 - **Multi-Agent Debate**: Trước khi xuất lỗi cuối cùng, thêm 1 step LLM Critic nội bộ rà soát lại kết quả xem lỗi này có thực là vi phạm không (tránh false positive - báo ảo).
-- **Vision-based Color Analysis**: Kết hợp OpenCV hoặc logic tách vùng ảnh để truy xuất chính xác thông số Palette (Màu hex) trên hình ảnh, từ đó so chuẩn tỷ lệ tương phản WCAG (thay vì thuần túy để Qwen nhìn cảm tính).
+- **Vision-based Color Analysis**: ✅ ĐÃ TÍCH HỢP. Kết hợp Scikit-learn (K-Means) và thuật toán Độ chói để truy xuất chính xác tỷ lệ tương phản WCAG trực tiếp từ Bounding Box, ghi đè hoàn toàn tính cảm tính của Qwen.
 - **Dynamic Few-Shot (In-Context Learning)**: Đưa các hình ảnh "Good/Bad practice" thẳng vào template trong Prompt đối với mỗi lĩnh vực, ép model học theo trực quan giúp Output có tính ổn định hơn.
 
 ### 4. Tính năng Thương mại & Ứng dụng Bổ trợ
