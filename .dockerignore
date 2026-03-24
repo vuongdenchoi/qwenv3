@@ -1,0 +1,26 @@
+.git
+.gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+.env
+.env.*
+*.log
+
+# Local/editor artifacts
+.idea/
+.vscode/
+
+# Python caches and test artifacts
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build/runtime outputs
+backend/latest_result.json
+backend/knowledge_base/faiss_index/
