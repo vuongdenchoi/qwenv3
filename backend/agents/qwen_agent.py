@@ -190,7 +190,13 @@ class QwenAgent:
             user_text=user_text,
             history_messages=history_messages,
         )
-        parsed = self._parse_json_response(raw_text)
+        try:
+            parsed = self._parse_json_response(raw_text)
+        except (ValueError, json.JSONDecodeError):
+            # Fallback: model trả về text thường (không phải JSON)
+            # Strip <think> blocks nếu còn sót
+            clean = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL).strip()
+            parsed = {"reply": clean, "zoom_command": None}
         if isinstance(parsed, dict):
             parsed["_usage"] = usage
         return parsed
@@ -276,11 +282,14 @@ class QwenAgent:
         return parsed
 
     # ------------------------------------------------------------------
-    # JSON parser – strip markdown fences nếu có
+    # JSON parser – strip markdown fences + <think> blocks nếu có
     # ------------------------------------------------------------------
     @staticmethod
     def _parse_json_response(raw_text: str) -> dict:
-        text = re.sub(r"```(?:json)?", "", raw_text).strip().strip("`").strip()
+        # Strip <think>...</think> blocks (Qwen3 thinking mode)
+        text = re.sub(r"<think>.*?</think>", "", raw_text, flags=re.DOTALL).strip()
+        # Strip markdown code fences
+        text = re.sub(r"```(?:json)?", "", text).strip().strip("`").strip()
         try:
             return json.loads(text)
         except json.JSONDecodeError:

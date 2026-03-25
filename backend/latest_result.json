@@ -1,0 +1,116 @@
+{
+    "e": [
+        {
+            "c": [
+                20,
+                116,
+                761,
+                532
+            ],
+            "r": "The poster uses a dense collage of high-contrast photographic images (tiger, giraffes, rhino, bumper boats) layered over text without sufficient visual separation or control of figure-ground relationship. According to Rule 7 (Figure-Ground must be clear at a glance), the background imagery competes with foreground text and icons for dominance, making focal points ambiguous and reducing readability from a distance.",
+            "s": "major",
+            "g": "poster_design"
+        },
+        {
+            "c": [
+                47,
+                31,
+                761,
+                105
+            ],
+            "r": "The header text 'ARBUCKLE Mountain Area' uses decorative, non-standard typefaces with inconsistent stroke weight and kerning, which fails Rule 65 (Graphic resonance: let the typeface carry connotative tone). The font lacks appropriate association with a theme park — it appears casual or amateurish rather than conveying excitement, adventure, or professionalism expected for an attraction.",
+            "s": "major",
+            "g": "typography"
+        },
+        {
+            "c": [
+                115,
+                506,
+                761,
+                678
+            ],
+            "r": "Text blocks such as 'Exit 51 off I-35' and phone numbers are overlaid on busy photographic backgrounds (race track, rhino) without any opacity, tint, or overlay treatment. This violates Rule 7 (Figure-ground must be clear at a glance) by allowing background elements to interfere with legibility. Additionally, multiple font sizes and styles create no visual hierarchy, violating Rule 14 (Framing is the designer's editorial choice) — the layout frames too much information without guiding interpretation.",
+            "s": "major",
+            "g": "poster_design"
+        },
+        {
+            "c": [
+                235,
+                642,
+                756,
+                676
+            ],
+            "r": "The URL 'www.arbucklewilderness.com' is placed directly on top of a photographic background (rhino image) without any contrast enhancement or background fill. This compromises readability and violates Rule 7 (Figure-ground must be clear at a glance). In digital contexts, this would also violate Rule 58 if exported as JPEG — though not visible here, the rasterized presentation implies risk of edge blurring. [LỖI WCAG: Tỷ lệ tương phản chỉ đạt 3.23:1, dưới mức chuẩn 4.5:1. Bạn cần tăng độ tương phản sáng tối giữa chữ và nền.]",
+            "s": "major",
+            "g": "typography"
+        },
+        {
+            "c": [
+                550,
+                798,
+                761,
+                870
+            ],
+            "r": "The 'Buffalo Gap' logo contains a pictorial icon (buffalo head) combined with stylized text that does not maintain consistent stroke weight or alignment. It lacks monochrome clarity — the buffalo graphic relies on color fills and shading to remain recognizable. This violates Rule 5 (Icon must work in monochrome), as its identity would collapse if rendered in black-and-white.",
+            "s": "major",
+            "g": "icon_design"
+        },
+        {
+            "c": [
+                20,
+                747,
+                761,
+                992
+            ],
+            "r": "The lower red section contains multiple overlapping text blocks for lodging options, websites, and contact info using inconsistent fonts, sizes, and alignments. There’s no clear typographic hierarchy or spatial organization. This violates Rule 14 (Framing is the designer’s editorial choice) — the layout includes too many competing messages without editorial prioritization, confusing the viewer about what to focus on first.",
+            "s": "major",
+            "g": "layout_rules"
+        },
+        {
+            "c": [
+                287,
+                403,
+                761,
+                496
+            ],
+            "r": "Bullet-pointed attractions list uses small, low-contrast sans-serif text against a blue background with slight drop shadow, but the text is still hard to read due to poor contrast ratio and lack of spacing. Violates Rule 10 (Icons, indices, and symbols operate differently in typography) — the bullet points are visually treated as icons (circles), but they’re not consistently styled or scaled, creating visual noise instead of clear signifiers.",
+            "s": "minor",
+            "g": "typography"
+        },
+        {
+            "c": [
+                32,
+                132,
+                761,
+                225
+            ],
+            "r": "The phrase 'Rediscover the All-New' uses a heavily outlined, glowing yellow font with drop shadow over a photographic background. While stylistically flashy, this style violates Rule 7 (Figure-ground must be clear at a glance) because the glow effect makes the text blend into surrounding colors and compete visually with the giraffe image behind it, reducing legibility and coherence.",
+            "s": "major",
+            "g": "poster_design"
+        },
+        {
+            "c": [
+                235,
+                678,
+                761,
+                747
+            ],
+            "r": "The award statement 'Awarded Oklahoma’s Outstanding Tourist Attraction 2005' uses bold, large serif font with red outline and drop shadow. This creates visual clutter and conflicts with the overall design’s aesthetic consistency. It violates Rule 65 (Graphic resonance) — the typeface doesn’t evoke tourism, excitement, or prestige; instead, it looks outdated and cheaply produced, undermining credibility.",
+            "s": "major",
+            "g": "typography"
+        }
+    ],
+    "isz": {
+        "w": 761,
+        "h": 1089
+    },
+    "te": 9,
+    "ss": {
+        "minor": 1,
+        "major": 8,
+        "critical": 0
+    },
+    "inputtoken": 2708,
+    "outputtoken": 1293,
+    "totaltoken": 4001
+}

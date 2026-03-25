@@ -12,7 +12,7 @@ class DesignCheckAgent:
     """
     Pipeline:
         image_bytes
-            -> RetrievalAgent  (TF-IDF search, top-k rules with category boost)
+            -> RetrievalAgent  (tìm design rules liên quan dùng Multilingual Embedding, top-k rules with category boost)
             -> PromptAgent     (build domain-aware multimodal prompt)
             -> QwenAgent       (Qwen VL API call)
             -> PostProcessAgent (validate + clean, add severity/category)
@@ -36,6 +36,13 @@ class DesignCheckAgent:
         # Step 1: Retrieval (with category boost)
         print(f"[DesignCheckAgent] Retrieving rules for query: '{query}'")
         rules = self.retriever.retrieve(query.lower())
+        
+        # Thêm điều kiện Fallback nếu không có từ khóa nào khớp (Score quá thấp)
+        if not rules or rules[0].get("score", 0.0) <= 0.01:
+            fallback_query = "graphic design poster advertisement typography color layout"
+            print(f"[DesignCheckAgent] Điểm khớp quá thấp, tự động dùng Query mẫu: '{fallback_query}'")
+            rules = self.retriever.retrieve(fallback_query)
+            
         print(f"[DesignCheckAgent] Retrieved {len(rules)} rules")
 
         # Log which rules were retrieved
