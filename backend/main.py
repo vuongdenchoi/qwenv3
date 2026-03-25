@@ -157,6 +157,31 @@ async def unified_chat(
             except Exception as e:
                 print(f"[Backend] Lỗi khi lưu file JSON: {e}")
             
+            # Lưu ảnh có vẽ bounding box ra máy tính
+            try:
+                debug_img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+                draw = ImageDraw.Draw(debug_img)
+                severity_colors = {
+                    "critical": (255, 50, 50),    # Đỏ
+                    "major":    (255, 165, 0),     # Cam
+                    "minor":    (255, 255, 0),     # Vàng
+                }
+                for idx, err in enumerate(result.get("e", [])):
+                    box = err.get("c")
+                    if not (isinstance(box, list) and len(box) == 4):
+                        continue
+                    x1, y1, x2, y2 = box
+                    color = severity_colors.get(err.get("s", "minor"), (255, 255, 0))
+                    draw.rectangle([x1, y1, x2, y2], outline=color, width=3)
+                    # Vẽ label số thứ tự lỗi
+                    label = f"#{idx+1} {err.get('s', '')}"
+                    draw.text((x1 + 4, y1 + 2), label, fill=color)
+                img_out_path = Path(__file__).parent / "latest_result.png"
+                debug_img.save(str(img_out_path), format="PNG")
+                print(f"[Backend] Đã xuất ảnh bounding box ra: {img_out_path}")
+            except Exception as e:
+                print(f"[Backend] Lỗi khi lưu ảnh bounding box: {e}")
+            
             # Nhét toàn bộ danh sách lỗi 'e' vào RAM để Chatbot 'nhớ' được vị trí và nội dung lỗi
             assistant_text = json.dumps(
                 {
