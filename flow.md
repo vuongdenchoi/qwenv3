@@ -7,6 +7,7 @@
 - **Qwen3-VL** (Vision-Language Model) để phân tích ảnh và phát hiện vi phạm
 - **Session Memory** (in-memory) để ghi nhớ hội thoại/câu hỏi theo `session_id` hoặc `user_id`
 - **FastAPI** backend + **HTML/JS** frontend
+muốn mở lưu result.json, png thì bỏ comment ở main.py dòng 150 đến 183 ( dòng 150-160 là lưu result.json, dòng 163-183 là lưu png)
 
 ---
 

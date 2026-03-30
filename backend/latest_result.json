@@ -2,60 +2,126 @@
     "e": [
         {
             "c": [
-                108,
-                389,
-                300,
-                542
+                18,
+                122,
+                198,
+                483
             ],
-            "r": "The text 'Simples. Verde. Essencial.' is rendered in a bold sans-serif typeface that lacks connotative tone appropriate for a nature brand — violating Rule 65 (Graphic resonance). The font feels generic and doesn’t evoke organic, essential, or natural associations; it’s visually neutral rather than thematically resonant. [LỖI WCAG: Tỷ lệ tương phản chỉ đạt 2.1:1, dưới mức chuẩn 4.5:1. Bạn cần tăng độ tương phản sáng tối giữa chữ và nền.]",
-            "s": "critical",
-            "g": "typography"
-        },
-        {
-            "c": [
-                108,
-                575,
-                300,
-                630
-            ],
-            "r": "The tagline 'A natureza dá o toque que você precisa.' uses a smaller, lighter sans-serif font that blends into the background due to low contrast with the green overlay. This violates Rule 7 — figure-ground must be clear at a glance. The text is not immediately legible against the semi-transparent shape.",
+            "r": "The red and gold curved graphic overlay is overly dominant and competes with the central photographic street scene, violating figure-ground must be clear at a glance. The background image becomes visually buried under the graphic layer, reducing legibility of the property context.",
             "s": "major",
             "g": "poster_design"
         },
         {
             "c": [
-                108,
-                660,
-                257,
-                696
+                28,
+                289,
+                166,
+                418
             ],
-            "r": "The WhatsApp contact button includes an icon and text ('(11) 9 45XX - 0000') within a rounded rectangle. The icon is a small pictogram (WhatsApp logo), which functions as an icon per Rule 10 — but its size and placement make it visually ambiguous without context. It’s not accompanied by a text label like 'WhatsApp' or 'Contato', violating Rule 15 for UI icons: icons must reinforce text labels, not substitute them.",
+            "r": "The circular badge containing 'Giá ưu đãi 10,2 Tỷ/căn' uses a high-contrast black-and-gold design that clashes with the surrounding red and gold curves. This creates visual noise and violates framing should guide interpretation, not distract. The badge’s aggressive styling undermines editorial clarity.",
+            "s": "major",
+            "g": "poster_design"
+        },
+        {
+            "c": [
+                173,
+                552,
+                430,
+                669
+            ],
+            "r": "The main headline text 'NHÀ PHỐ KHU TÊN LỬA' uses a bold, stylized serif font with heavy drop shadow and gradient fill. This violates typeface should carry connotative tone; here, the font appears decorative and lacks professional gravitas for real estate advertising. It distracts from the message rather than amplifying it. [LỖI WCAG: Tỷ lệ tương phản chỉ đạt 4.17:1, dưới mức chuẩn 4.5:1. Bạn cần tăng độ tương phản sáng tối giữa chữ và nền.]",
+            "s": "major",
+            "g": "typography"
+        },
+        {
+            "c": [
+                198,
+                669,
+                404,
+                708
+            ],
+            "r": "The subheading 'BÌNH TRỊ ĐÔNG B' is rendered in a small, low-contrast sans-serif font against a red background. It suffers from poor contrast (icons/symbols must be readable), making it hard to read at a glance. Also violates ground and figure are not clearly separated.",
+            "s": "major",
+            "g": "typography"
+        },
+        {
+            "c": [
+                376,
+                682,
+                528,
+                791
+            ],
+            "r": "The two scooter icons are placed as visual elements without accompanying text labels. Violates UI icons must reinforce text, not substitute. These icons lack context or explanatory text, making their meaning ambiguous to viewers unfamiliar with local real estate marketing symbols.",
             "s": "major",
             "g": "icon_design"
         },
         {
             "c": [
-                312,
-                182,
-                673,
-                816
+                0,
+                0,
+                604,
+                835
             ],
-            "r": "The potted plant is placed directly on the green background without any visual separation or layering effect to distinguish it as the primary figure. While the green overlay helps, the plant’s shadow and lighting are too soft and blend into the background, risking loss of figure-ground clarity — violating Rule 7 (Figure-Ground must be clear at a glance).",
+            "r": "The entire poster lacks pattern continuity . There is no recurring compositional structure, typographic system, or color motif across the design — elements appear randomly assembled. The logo, price badge, text blocks, and icons do not form a unified visual identity, undermining campaign cohesion.",
+            "s": "critical",
+            "g": "pattern_design"
+        },
+        {
+            "c": [
+                6,
+                736,
+                90,
+                791
+            ],
+            "r": "The bottom-left watermark/logo contains a colorful abstract swirl with illegible text. This violates icons must work in monochrome. The design relies on color to convey meaning, and its shape is too vague to be decoded without color, making it ineffective as a brand mark.",
+            "s": "major",
+            "g": "icon_design"
+        },
+        {
+            "c": [
+                483,
+                770,
+                602,
+                803
+            ],
+            "r": "The 'DESIGN PRINTING' label uses a bright blue background with white text. While legible, this element is visually jarring and poorly integrated into the overall red/gold aesthetic. Violates editorial framing should support the primary message, not introduce competing visual signals.",
+            "s": "minor",
+            "g": "poster_design"
+        },
+        {
+            "c": [
+                0,
+                791,
+                604,
+                835
+            ],
+            "r": "The footer contact information is crammed into a narrow strip with tiny, low-contrast text. Violates ground and figure conflict. The text blends into the red background and is unreadable at typical viewing distances, failing basic legibility standards. [LỖI WCAG: Tỷ lệ tương phản chỉ đạt 4.37:1, dưới mức chuẩn 4.5:1. Bạn cần tăng độ tương phản sáng tối giữa chữ và nền.]",
+            "s": "major",
+            "g": "typography"
+        },
+        {
+            "c": [
+                18,
+                0,
+                585,
+                122
+            ],
+            "r": "The company logo 'THÁI SƠN REAL' is placed over a photographic background without sufficient contrast or overlay control. The logo’s colors (blue, red, orange) clash with the muted tones of the photo, violating figure-ground must be clear at a glance.",
             "s": "major",
             "g": "poster_design"
         }
     ],
     "isz": {
-        "w": 736,
-        "h": 920
+        "w": 604,
+        "h": 837
     },
-    "te": 4,
+    "te": 10,
     "ss": {
-        "minor": 0,
-        "major": 3,
+        "minor": 1,
+        "major": 8,
         "critical": 1
     },
-    "inputtoken": 2898,
-    "outputtoken": 827,
-    "totaltoken": 3725
+    "inputtoken": 2725,
+    "outputtoken": 1089,
+    "totaltoken": 3814
 }
