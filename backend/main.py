@@ -121,6 +121,23 @@ async def unified_chat(
             image_bytes = await file.read()
             if len(image_bytes) == 0:
                 raise HTTPException(status_code=400, detail="File ảnh rỗng.")
+            
+            # Scale ảnh để giảm token tiêu hao
+            try:
+                img = Image.open(io.BytesIO(image_bytes))
+                if img.mode != "RGB":
+                    img = img.convert("RGB")
+                
+                MAX_SIZE = 1536
+                if img.width > MAX_SIZE or img.height > MAX_SIZE:
+                    img.thumbnail((MAX_SIZE, MAX_SIZE), Image.Resampling.LANCZOS)
+                    out_buf = io.BytesIO()
+                    img.save(out_buf, format="JPEG", quality=85)
+                    image_bytes = out_buf.getvalue()
+                    print(f"[Backend] Đã scale ảnh xuống ({img.width}x{img.height}) để giảm token tiêu hao.")
+            except Exception as e:
+                print(f"[Backend] Lỗi xử lý/scale ảnh: {e}")
+                
             agent = get_agent()
             
             # Sử dụng mạch query cũ nếu có để bối cảnh không bị đứt đoạn
