@@ -1,97 +1,79 @@
 """
-Retrieval Agent – tìm design rules liên quan dùng Multilingual Embedding.
-Model: paraphrase-multilingual-MiniLM-L12-v2
-  - Hỗ trợ tiếng Việt + tiếng Anh (và 50+ ngôn ngữ khác)
-  - Không cần query expansion / synonym dict
-  - Category boost ×1.3 vẫn giữ nguyên
+Retrieval Agent – tìm design rules liên quan dùng TF-IDF (scikit-learn).
+Nhẹ hơn sentence-transformers ~10x, không cần PyTorch.
+Category boost ×1.3 vẫn giữ nguyên.
 """
-import os
-os.environ["USE_TF"] = "0"
-os.environ["USE_TORCH"] = "1"
-
 import json
-import numpy as np
+import pickle
 from typing import List, Dict, Set
 from pathlib import Path
 
-
-INDEX_DIR  = Path(__file__).resolve().parent.parent / "knowledge_base" / "faiss_index"
-MODEL_NAME = "paraphrase-multilingual-MiniLM-L12-v2"
+INDEX_DIR = Path(__file__).resolve().parent.parent / "knowledge_base" / "faiss_index"
 
 # Map query keywords → category names (dùng để boost score)
 CATEGORY_KEYWORDS: Dict[str, List[str]] = {
     "color_theory"  : ["color", "colour", "hue", "saturation", "contrast", "palette",
                         "rgb", "cmyk", "tint", "shade", "complementary", "analogous",
                         "warm", "cool", "vibration", "value",
-                        # Vietnamese
                         "màu", "màu sắc", "tương phản", "bảng màu", "độ bão hòa"],
     "typography"    : ["typography", "typeface", "font", "serif", "sans", "type",
                         "leading", "kerning", "tracking", "legibility", "readability",
                         "headline", "body text", "letter", "glyph", "weight",
-                        # Vietnamese
                         "chữ", "font chữ", "kiểu chữ", "cỡ chữ", "dễ đọc"],
     "layout_rules"  : ["layout", "grid", "composition", "margin", "spacing", "alignment",
                         "column", "proximity", "whitespace", "white space", "hierarchy",
                         "balance", "symmetry", "asymmetry", "direction", "wayfinding",
-                        # Vietnamese
                         "bố cục", "lưới", "khoảng trắng", "căn chỉnh", "cân bằng"],
     "logo_design"   : ["logo", "logotype", "brand", "identity", "mark", "monogram",
                         "wordmark", "branding", "graphic identity", "exclusion zone",
-                        # Vietnamese
                         "thương hiệu", "nhận diện"],
     "poster_design" : ["poster", "advertisement", "billboard", "campaign", "print",
                         "focal", "visual noise", "outdoor", "format", "signage",
-                        # Vietnamese
                         "áp phích", "quảng cáo", "tờ rơi"],
     "icon_design"   : ["icon", "pictogram", "symbol", "wayfinding", "glyph",
                         "ui icon", "sign", "pictograph", "stroke weight", "icon set",
                         "icon system", "monochrome icon", "icon grid", "legibility",
                         "icon style", "navigation icon", "app icon", "ui symbol",
-                        # Vietnamese
                         "biểu tượng", "icon"],
     "pattern_design": ["pattern", "motif", "repeat", "tile", "tiling", "textile",
                         "half-drop", "brick repeat", "mirrored repeat", "tossed",
                         "surface design", "print design", "seamless", "density",
                         "ditsy", "floral pattern", "geometric pattern", "folk pattern",
-                        # Vietnamese
                         "họa tiết", "hoa văn", "lặp lại"],
 }
 
-CATEGORY_BOOST = 1.3  # score multiplier when query matches a category
+CATEGORY_BOOST = 1.3
 
 
 class RetrievalAgent:
     def __init__(self, top_k: int = 10):
         self.top_k = top_k
-        self._load_model()
         self._load_index()
 
-    def _load_model(self):
-        """Load sentence-transformer model (1 lần khi khởi tạo)."""
-        from sentence_transformers import SentenceTransformer
-        print(f"[RetrievalAgent] Loading embedding model: {MODEL_NAME}")
-        self.model = SentenceTransformer(MODEL_NAME)
-        print(f"[RetrievalAgent] Model loaded.")
-
     def _load_index(self):
-        """Load embedding vectors và metadata từ disk."""
-        emb_path  = INDEX_DIR / "embeddings.npy"
+        """Load TF-IDF vectorizer, matrix và metadata từ disk."""
+        vec_path  = INDEX_DIR / "tfidf_vectorizer.pkl"
+        mat_path  = INDEX_DIR / "tfidf_matrix.npz"
         meta_path = INDEX_DIR / "metadata.json"
 
-        if not emb_path.exists():
+        if not vec_path.exists():
             raise FileNotFoundError(
-                f"Embedding index không tìm thấy tại {INDEX_DIR}. "
+                f"TF-IDF index không tìm thấy tại {INDEX_DIR}. "
                 "Chạy backend/knowledge_base/build_index.py trước."
             )
 
-        self.embeddings = np.load(str(emb_path))  # shape (N, 384)
+        import scipy.sparse
+        with open(vec_path, "rb") as f:
+            self.vectorizer = pickle.load(f)
+
+        self.matrix = scipy.sparse.load_npz(str(mat_path))
+
         with open(meta_path, encoding="utf-8") as f:
             self.metadata = json.load(f)
-        print(f"[RetrievalAgent] Loaded embeddings: {self.embeddings.shape[0]} chunks, dim={self.embeddings.shape[1]}")
 
-    # ------------------------------------------------------------------
-    # Detect which design categories the query matches (for boost)
-    # ------------------------------------------------------------------
+        print(f"[RetrievalAgent] Loaded TF-IDF index: {self.matrix.shape[0]} chunks, "
+              f"vocab={self.matrix.shape[1]}")
+
     def _detect_categories(self, query: str) -> Set[str]:
         q = query.lower()
         matched = set()
@@ -100,20 +82,12 @@ class RetrievalAgent:
                 matched.add(cat)
         return matched
 
-    # ------------------------------------------------------------------
-    # Main retrieval
-    # ------------------------------------------------------------------
     def retrieve(self, query: str) -> list:
-        """Return top-k relevant rules for the given query.
-        
-        Hỗ trợ tiếng Việt + tiếng Anh nhờ multilingual embedding.
-        Áp category boost ×1.3 khi query khớp domain.
-        """
+        """Return top-k relevant rules for the given query using TF-IDF cosine similarity."""
         from sklearn.metrics.pairwise import cosine_similarity
 
-        # Encode query → vector 384D (tự hiểu Việt + Anh)
-        query_vec = self.model.encode([query])  # shape (1, 384)
-        scores    = cosine_similarity(query_vec, self.embeddings).flatten()
+        query_vec = self.vectorizer.transform([query])          # sparse (1, vocab)
+        scores    = cosine_similarity(query_vec, self.matrix).flatten()
 
         print(f"[RetrievalAgent] Query: '{query[:60]}'")
 
