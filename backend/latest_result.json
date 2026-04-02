@@ -2,27 +2,82 @@
     "e": [
         {
             "c": [
-                190,
-                290,
-                874,
-                786
+                108,
+                389,
+                298,
+                540
             ],
-            "r": "The text is rendered as a highly stylized, fluid, and distorted 3D ribbon effect with low contrast between the glowing white letterforms and the pink gradient background. This violates Figure-ground must be clear at a glance, as the text blends into its own background texture, reducing legibility from any viewing distance.",
+            "r": "The text 'Simples. Verde. Essencial.' uses a clean sans-serif typeface that aligns with the minimalist aesthetic, but its placement within a semi-transparent green overlay creates low contrast against the background, risking legibility at small viewing distances — violating (Figure-ground must be clear at a glance) and (icons/symbols must not rely on context for decoding).",
             "s": "major",
             "g": "poster_design"
+        },
+        {
+            "c": [
+                108,
+                578,
+                298,
+                632
+            ],
+            "r": "Smaller body text 'A natureza dá o toque que você precisa.' is visually buried under the same green overlay without sufficient contrast or typographic hierarchy. This violates (Framing is editorial choice) — the message lacks visual emphasis and risks being overlooked.",
+            "s": "major",
+            "g": "poster_design"
+        },
+        {
+            "c": [
+                108,
+                662,
+                257,
+                696
+            ],
+            "r": "The WhatsApp contact element includes an icon and text in a single container. The icon’s meaning (WhatsApp) is culturally recognized as a symbol, but its size and placement are inconsistent with surrounding typographic elements. Violates (UI icons must reinforce — not substitute — text labels), especially since no accompanying label clarifies the function beyond the icon alone.",
+            "s": "minor",
+            "g": "icon_design"
+        },
+        {
+            "c": [
+                312,
+                62,
+                419,
+                117
+            ],
+            "r": "The logo 'Terraria Elements' features a stylized leaf icon paired with text. While the icon is simple, it lacks monochrome clarity — if rendered in grayscale, the thin lines may become illegible. Violates (Icon must work in monochrome).",
+            "s": "major",
+            "g": "icon_design"
+        },
+        {
+            "c": [
+                73,
+                147,
+                500,
+                809
+            ],
+            "r": "The green overlay shape framing the text is asymmetrical and does not follow any consistent compositional pattern. In a campaign context, this breaks (Pattern creates visual identity across a series), as there’s no recurring structure to identify this as part of a unified design system.",
+            "s": "critical",
+            "g": "pattern_design"
+        },
+        {
+            "c": [
+                0,
+                0,
+                736,
+                920
+            ],
+            "r": "The entire poster uses a monochromatic green palette with minimal variation. While stylistically coherent, it lacks visual rhythm or contrast to guide the eye through the message. Violates (Pattern creates visual identity) by offering no dynamic variation or structural cues to support narrative flow or retention.",
+            "s": "major",
+            "g": "pattern_design"
         }
     ],
     "isz": {
-        "w": 1086,
-        "h": 1536
+        "w": 736,
+        "h": 920
     },
-    "te": 1,
+    "te": 6,
     "ss": {
-        "minor": 0,
-        "major": 1,
-        "critical": 0
+        "minor": 1,
+        "major": 4,
+        "critical": 1
     },
-    "inputtoken": 3863,
-    "outputtoken": 676,
-    "totaltoken": 4539
+    "inputtoken": 2964,
+    "outputtoken": 681,
+    "totaltoken": 3645
 }

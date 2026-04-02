@@ -24,3 +24,4 @@ env/
 # Build/runtime outputs
 backend/latest_result.json
 backend/knowledge_base/faiss_index/
+backend/static_temp/

@@ -37,3 +37,6 @@ backend/knowledge_base/faiss_index/
 
 # Temp
 tmp/
+
+# Wan 2.6 Inpainting – ảnh host tạm
+backend/static_temp/

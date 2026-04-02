@@ -3,6 +3,8 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
+# Đặt domain public để Wan API truy cập ảnh gốc (override bằng -e hoặc docker-compose)
+ENV PUBLIC_BASE_URL=https://your-domain.com
 
 WORKDIR /app
 

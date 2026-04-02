@@ -17,6 +17,7 @@ import re
 import json
 
 from agents.design_check_agent import DesignCheckAgent
+from agents.inpaint_agent import InpaintAgent
 from memory_store import MemoryStore
 
 # Windows console encoding fix
@@ -35,7 +36,13 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 if FRONTEND_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
 
+# Thư mục tạm chứa ảnh gốc để host cho Wan API truy cập
+TEMP_ASSETS_DIR = Path(__file__).parent / "static_temp"
+TEMP_ASSETS_DIR.mkdir(exist_ok=True)
+app.mount("/temp-assets", StaticFiles(directory=str(TEMP_ASSETS_DIR)), name="temp-assets")
+
 _agent = None
+_inpaint_agent = None
 memory_store = MemoryStore()
 
 def get_agent():
@@ -44,6 +51,14 @@ def get_agent():
         api_key = os.getenv("DASHSCOPE_API_KEY", "")
         _agent = DesignCheckAgent(api_key=api_key)
     return _agent
+
+def get_inpaint_agent():
+    global _inpaint_agent
+    if _inpaint_agent is None:
+        api_key = os.getenv("DASHSCOPE_API_KEY", "")
+        public_base_url = os.getenv("PUBLIC_BASE_URL", "http://localhost:8000")
+        _inpaint_agent = InpaintAgent(api_key=api_key, public_base_url=public_base_url)
+    return _inpaint_agent
 
 @app.get("/")
 async def serve_frontend():
@@ -312,6 +327,118 @@ async def unified_chat(
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# -------------------------------------------------------------------
+# ENDPOINT: PREPARE-REGEN – Chuẩn bị preview mask và prompt gợi ý
+# -------------------------------------------------------------------
+@app.post("/prepare-regen")
+async def prepare_regen(
+    session_id: Optional[str] = Form(""),
+    error_indices: Optional[str] = Form("[]"),  # JSON array string, e.g. "[0,2]"
+):
+    """
+    Bước 1: Nhận danh sách index lỗi muốn fix.
+    Trả về:
+      - mask_preview_b64: preview ảnh gốc + overlay đỏ vùng lỗi
+      - suggested_prompt: prompt gợi ý từ mô tả lỗi
+      - error_count: số lỗi được chọn
+    """
+    key = session_id.strip() if session_id else "anonymous"
+
+    last = memory_store.get_last_analysis(key)
+    if not last:
+        raise HTTPException(status_code=404, detail="Cần phân tích ảnh trước.")
+    image_bytes, last_result = last
+
+    try:
+        indices = json.loads(error_indices)
+        if not isinstance(indices, list):
+            indices = []
+    except Exception:
+        indices = []
+
+    errors = (last_result or {}).get("e", [])
+    if not errors:
+        raise HTTPException(status_code=400, detail="Không có dữ liệu lỗi.")
+
+    agent = get_inpaint_agent()
+
+    # Tạo preview mask (overlay UI)
+    preview_bytes = agent.build_mask_preview(image_bytes, errors, indices)
+    preview_b64 = "data:image/png;base64," + base64.b64encode(preview_bytes).decode("utf-8")
+
+    # Tạo prompt gợi ý
+    suggested_prompt = agent.build_prompt(errors, indices)
+
+    # Lưu ảnh gốc ra static_temp để sẵn sàng cho bước regen
+    agent.prepare_original_image(image_bytes, key)
+
+    return {
+        "type": "regen_preview",
+        "mask_preview_b64": preview_b64,
+        "suggested_prompt": suggested_prompt,
+        "error_count": len([i for i in indices if 0 <= i < len(errors)])
+    }
+
+
+# -------------------------------------------------------------------
+# ENDPOINT: REGEN-IMAGE – Thực thi gen lại ảnh qua Wan 2.6
+# -------------------------------------------------------------------
+@app.post("/regen-image")
+async def regen_image(
+    session_id: Optional[str] = Form(""),
+    error_indices: Optional[str] = Form("[]"),
+    final_prompt: Optional[str] = Form(""),
+):
+    """
+    Bước 2: Gọi Wan 2.6 API để gen lại ảnh đã sửa lỗi.
+    Trả về ảnh kết quả dạng base64.
+    """
+    key = session_id.strip() if session_id else "anonymous"
+
+    last = memory_store.get_last_analysis(key)
+    if not last:
+        raise HTTPException(status_code=404, detail="Cần phân tích ảnh trước.")
+    image_bytes, last_result = last
+
+    try:
+        indices = json.loads(error_indices)
+        if not isinstance(indices, list):
+            indices = []
+    except Exception:
+        indices = []
+
+    agent = get_inpaint_agent()
+
+    try:
+        result = agent.fix_errors(
+            image_bytes=image_bytes,
+            analysis_result=last_result or {},
+            error_indices=indices,
+            session_id=key,
+            custom_prompt=final_prompt.strip() if final_prompt else None,
+        )
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Lỗi khi gọi Wan API: {e}")
+
+    if not result["success"]:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Wan API không thành công: {result.get('error', 'Unknown error')}"
+        )
+
+    result_bytes = result["result_bytes"]
+    result_b64 = "data:image/png;base64," + base64.b64encode(result_bytes).decode("utf-8")
+
+    return {
+        "type": "regen_result",
+        "image_data_url": result_b64,
+        "prompt_used": result["prompt_used"],
+        "reply": f"✅ Đã sửa {len(indices)} vùng lỗi bằng Wan 2.6. Đây là ảnh thiết kế đã được cải thiện:"
+    }
 
 
 if __name__ == "__main__":

@@ -214,6 +214,172 @@
       color: #fff;
     }
 
+    /* Checkbox trong error-item */
+    .error-check {
+      accent-color: #10a37f;
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Fix Selected button */
+    .fix-selected-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 10px 12px;
+      padding: 10px 16px;
+      background: linear-gradient(135deg, #10a37f, #0e8c6c);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+    .fix-selected-btn:hover { opacity: 0.9; transform: scale(1.02); }
+    .fix-selected-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* Modal Regen */
+    #regen-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    #regen-modal-overlay.active { display: flex; }
+
+    #regen-modal {
+      background: rgba(40, 40, 45, 0.95);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 520px;
+      width: 90%;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    #regen-modal h3 {
+      color: #fff;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    #regen-mask-preview {
+      width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid rgba(255,60,60,0.4);
+      background: #111;
+      display: none;
+    }
+
+    #regen-prompt-input {
+      width: 100%;
+      background: #2a2a2a;
+      border: 1px solid #555;
+      border-radius: 8px;
+      color: #eee;
+      font-size: 0.88rem;
+      font-family: inherit;
+      padding: 10px 12px;
+      resize: vertical;
+      min-height: 90px;
+      line-height: 1.5;
+      outline: none;
+    }
+    #regen-prompt-input:focus { border-color: #10a37f; }
+
+    .regen-modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn-cancel-regen {
+      background: #3c3c3c;
+      border: none;
+      color: #aaa;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .btn-cancel-regen:hover { background: #4a4a4a; color: #fff; }
+
+    .btn-start-regen {
+      background: linear-gradient(135deg, #a855f7, #7c3aed);
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-start-regen:hover { opacity: 0.88; }
+    .btn-start-regen:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Loading spinner trong modal */
+    .regen-loading {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: #aaa;
+    }
+    .regen-loading.active { display: flex; }
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 3px solid #444;
+      border-top-color: #a855f7;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Regen result image trong chat */
+    .regen-result-img {
+      max-width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+      display: block;
+      border: 2px solid #a855f7;
+    }
+    .download-regen-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 8px 14px;
+      background: #3c3c3c;
+      border: 1px solid #555;
+      color: #ddd;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+    .download-regen-btn:hover { background: #555; color: #fff; }
+
     /* Input Area */
     #input-zone {
       padding: 20px;
@@ -333,6 +499,28 @@
     <div>Design Check <span>AI</span></div>
   </header>
 
+  <!-- Modal Fix & Regen -->
+  <div id="regen-modal-overlay">
+    <div id="regen-modal">
+      <h3>🪄 Fix & Regen bằng Wan 2.6</h3>
+      <img id="regen-mask-preview" src="" alt="Mask preview" />
+      <div>
+        <label style="font-size:0.82rem;color:#aaa;margin-bottom:6px;display:block;">Prompt sửa lỗi (có thể chỉnh):</label>
+        <textarea id="regen-prompt-input" placeholder="Mô tả các lỗi cần sửa..."></textarea>
+      </div>
+      <div class="regen-loading" id="regen-loading">
+        <div class="spinner"></div>
+        <span>Wan 2.6 đang gen lại ảnh... (có thể mất 30–90 giây)</span>
+      </div>
+      <div class="regen-modal-actions">
+        <button class="btn-cancel-regen" id="btn-cancel-regen" onclick="closeRegenModal()">Hủy</button>
+        <button class="btn-start-regen" id="btn-start-regen" onclick="startRegen()">
+          <span>🚀</span> Bắt đầu Gen lại
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="chat-container">
     <div class="message ai">
       <div class="avatar">🔍</div>
@@ -369,6 +557,7 @@
     }
 
     let selectedFile = null;
+    let currentErrorCount = 0;  // Số lỗi trong analysis card hiện tại
 
     function autoGrow(el) {
       el.style.height = "5px";
@@ -476,6 +665,7 @@
 
     function renderAnalysisCard(parentDiv, analysisData, file) {
       const errors = analysisData.e || [];
+      currentErrorCount = errors.length;
 
       const card = document.createElement('div');
       card.className = "analysis-card";
@@ -493,13 +683,22 @@
         errors.forEach((err, i) => {
           list.innerHTML += `
           <div class="error-item">
-            <span style="background:#555;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;">${i + 1}</span>
+            <input type="checkbox" class="error-check" id="err-check-${i}" data-index="${i}" />
+            <span style="background:#555;color:#fff;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;">${i + 1}</span>
             <div class="reason">${err.r}</div>
             <span class="error-tag tag-${err.s}">${err.s}</span>
             <button class="zoom-btn" onclick="requestZoom(${i})">🔍 Zoom</button>
           </div>
         `;
         });
+
+        // Fix Selected button
+        const fixBtn = document.createElement('button');
+        fixBtn.className = 'fix-selected-btn';
+        fixBtn.id = 'fix-selected-btn';
+        fixBtn.innerHTML = '🪄 Fix Selected';
+        fixBtn.onclick = openRegenModal;
+        list.appendChild(fixBtn);
       }
       card.appendChild(list);
       parentDiv.appendChild(card);
@@ -541,6 +740,126 @@
       formData.append("action_type", "zoom");
       formData.append("error_index", errorIndex);
       callBackend(formData, aiContent, null);
+    }
+
+    // --------------------------------------------------------
+    // Fix & Regen Modal Logic
+    // --------------------------------------------------------
+
+    async function openRegenModal() {
+      // Thu thập các checkbox đã chọn
+      const checked = [];
+      for (let i = 0; i < currentErrorCount; i++) {
+        const cb = document.getElementById(`err-check-${i}`);
+        if (cb && cb.checked) checked.push(i);
+      }
+
+      if (checked.length === 0) {
+        alert('Vui lòng chọn ít nhất 1 lỗi để fix (tick vào ô checkbox).');
+        return;
+      }
+
+      // Hiện modal
+      const overlay = document.getElementById('regen-modal-overlay');
+      overlay.classList.add('active');
+
+      // Reset state
+      document.getElementById('regen-mask-preview').style.display = 'none';
+      document.getElementById('regen-prompt-input').value = 'Đang tải...';      
+      document.getElementById('btn-start-regen').disabled = true;
+
+      try {
+        const fd = new FormData();
+        fd.append('session_id', sessionId);
+        fd.append('error_indices', JSON.stringify(checked));
+
+        const res = await fetch('/prepare-regen', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        // Hiện preview mask
+        const maskImg = document.getElementById('regen-mask-preview');
+        maskImg.src = data.mask_preview_b64;
+        maskImg.style.display = 'block';
+
+        // Điền prompt gợi ý
+        document.getElementById('regen-prompt-input').value = data.suggested_prompt || '';
+        document.getElementById('btn-start-regen').disabled = false;
+
+        // Lưu indices vào dataset để dùng khi submit
+        document.getElementById('btn-start-regen').dataset.indices = JSON.stringify(checked);
+
+      } catch (err) {
+        document.getElementById('regen-prompt-input').value = 'Lỗi tải dữ liệu: ' + err.message;
+        document.getElementById('btn-start-regen').disabled = false;
+      }
+    }
+
+    function closeRegenModal() {
+      document.getElementById('regen-modal-overlay').classList.remove('active');
+      document.getElementById('regen-loading').classList.remove('active');
+      document.getElementById('btn-cancel-regen').disabled = false;
+      document.getElementById('btn-start-regen').disabled = false;
+    }
+
+    async function startRegen() {
+      const prompt = document.getElementById('regen-prompt-input').value.trim();
+      const indicesStr = document.getElementById('btn-start-regen').dataset.indices || '[]';
+
+      // Hiện loading
+      document.getElementById('regen-loading').classList.add('active');
+      document.getElementById('btn-start-regen').disabled = true;
+      document.getElementById('btn-cancel-regen').disabled = true;
+
+      try {
+        const fd = new FormData();
+        fd.append('session_id', sessionId);
+        fd.append('error_indices', indicesStr);
+        fd.append('final_prompt', prompt);
+
+        const res = await fetch('/regen-image', { method: 'POST', body: fd });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.detail || 'HTTP ' + res.status);
+        }
+        const data = await res.json();
+
+        // Đóng modal
+        closeRegenModal();
+
+        // Hiển thị kết quả trong chat
+        const numFixed = JSON.parse(indicesStr).length;
+        const aiContent = createBubble('ai', data.reply || `✅ Đã sửa ${numFixed} vùng lỗi bằng Wan 2.6:`);
+
+        // Ảnh kết quả
+        const img = document.createElement('img');
+        img.className = 'regen-result-img';
+        img.src = data.image_data_url;
+        img.alt = 'Ảnh thiết kế đã sửa';
+        aiContent.appendChild(img);
+
+        // Nút download
+        const dlLink = document.createElement('a');
+        dlLink.className = 'download-regen-btn';
+        dlLink.href = data.image_data_url;
+        dlLink.download = `design_fixed_wan26.png`;
+        dlLink.innerHTML = '⬇️ Tải ảnh về';
+        aiContent.appendChild(dlLink);
+
+        // Nhỏ note prompt đã dùng
+        if (data.prompt_used) {
+          const note = document.createElement('div');
+          note.style.cssText = 'font-size:0.75rem;color:#666;margin-top:8px;font-style:italic;';
+          note.textContent = `Prompt: "${data.prompt_used.slice(0, 120)}${data.prompt_used.length > 120 ? '...' : ''}"`;
+          aiContent.appendChild(note);
+        }
+
+        document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+
+      } catch (err) {
+        closeRegenModal();
+        createBubble('ai', `<span style="color:#e74c3c;">❌ Lỗi gen ảnh: ${err.message}</span>`);
+      }
     }
   </script>
 </body>

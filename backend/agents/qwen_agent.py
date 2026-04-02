@@ -14,7 +14,7 @@ from dashscope import MultiModalConversation
 # Config
 # -----------------------------------------------------------------------
 QWEN_API_KEY = os.getenv("DASHSCOPE_API_KEY", "sk-39c8667844bd4d738ca1c0e387afbc23")
-QWEN_MODEL   = os.getenv("QWEN_MODEL", "qwen3-vl-flash")
+QWEN_MODEL   = os.getenv("QWEN_MODEL", "qwen3-vl-flash") 
 
 # Dùng endpoint quốc tế
 dashscope.base_http_api_url = "https://dashscope-intl.aliyuncs.com/api/v1"
